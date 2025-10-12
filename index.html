@@ -1,115 +1,980 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Interactive Futuristic Layout</title>
     <!-- Tailwind CSS for utility classes -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
     <!-- Tone.js for audio feedback -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <!-- CodeMirror for rich text editing -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/closebrackets.min.js"></script>
     <!-- Three.js for the portal effect -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-</head>
-<body>
+
+    <style>
+      /* Custom styles for the futuristic look */
+      :root {
+        --sidebar-width: 240px;
+        --sidebar-width-minimized: 80px;
+        --bg-color: #000000;
+        --sidebar-bg: #000000;
+        --text-primary: #e0e0e0;
+        --text-secondary: #a0a0c0;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --hover-bg: rgba(255, 255, 255, 0.05);
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --accent-glow: rgba(0, 255, 255, 0.5);
+        --accent-color-1: #ff00ff; /* Magenta */
+        --accent-color-2: #00ffff; /* Cyan */
+
+        /* Pastel Widget Colors */
+        --widget-bg-1: rgba(46, 52, 64, 0.9); /* Dark Blue */
+        --widget-bg-2: rgba(59, 46, 64, 0.9); /* Dark Purple */
+        --widget-bg-3: rgba(46, 64, 62, 0.9); /* Dark Teal */
+        --widget-bg-4: rgba(64, 46, 46, 0.9); /* Dark Red */
+        --widget-bg-5: rgba(64, 60, 46, 0.9); /* Dark Yellow */
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        overflow: hidden;
+      }
+
+      #portal-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+      }
+
+      /* Main layout container */
+      .main-layout {
+        display: flex;
+        height: 100vh;
+        position: relative;
+        z-index: 1;
+        background-color: transparent;
+      }
+      .sidebar {
+        width: var(--sidebar-width);
+        height: 100vh;
+        background: var(--sidebar-bg);
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        flex-shrink: 0;
+        border-right: 1px solid var(--border-color);
+      }
+      .sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        overflow: hidden;
+        height: 56px;
+      }
+      .sidebar-toggle {
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid transparent;
+        transition: border-color 0.2s ease;
+      }
+      .sidebar-toggle:hover {
+        background: var(--hover-bg);
+        border-color: var(--border-color);
+      }
+      .hamburger-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+      }
+      .hamburger-icon span {
+        display: block;
+        width: 100%;
+        height: 2px;
+        background-color: var(--text-secondary);
+        border-radius: 1px;
+        transition: all 0.3s ease-in-out;
+      }
+      .sidebar-toggle:hover .hamburger-icon span {
+        background-color: #ffffff;
+      }
+      .nav-links {
+        flex-grow: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+      .nav-links ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      .nav-links a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: var(--text-primary);
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .nav-links a.active {
+        background: var(--hover-bg);
+        color: #fff;
+      }
+      .nav-links a.active svg {
+        stroke: var(--accent-color-2);
+      }
+      .nav-links svg {
+        width: 24px;
+        height: 24px;
+        stroke: #ffffff;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+      }
+      .sidebar-footer {
+        padding: 0.75rem;
+        border-top: 1px solid var(--border-color);
+      }
+      .logo-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .profile-pic {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+      .sidebar.minimized {
+        width: var(--sidebar-width-minimized);
+      }
+      .sidebar.minimized .nav-links span,
+      .sidebar.minimized .sidebar-footer span,
+      .sidebar.minimized .sidebar-header .logo-wrapper {
+        display: none;
+      }
+      .sidebar.minimized .sidebar-header {
+        justify-content: center;
+      }
+      .sidebar.minimized .nav-links a {
+        justify-content: center;
+      }
+      body:not(.sidebar-minimized)
+        .sidebar.minimized
+        .hamburger-icon
+        span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+      }
+      body:not(.sidebar-minimized)
+        .sidebar.minimized
+        .hamburger-icon
+        span:nth-child(2) {
+        opacity: 0;
+      }
+      body:not(.sidebar-minimized)
+        .sidebar.minimized
+        .hamburger-icon
+        span:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+      }
+      .main-content {
+        flex-grow: 1;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        padding: 0;
+      }
+      .page {
+        display: none;
+        height: 100%;
+        width: 100%;
+      }
+      .page.active {
+        display: block;
+      }
+
+      /* --- New Workspace Styles --- */
+      .workspace-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      #background-video-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+      }
+      body.in-fullscreen-mode #background-video-container {
+        pointer-events: auto;
+      }
+      #background-video-container .video-player-container {
+        width: 100%;
+        height: 100%;
+      }
+      .workspace-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+        pointer-events: none;
+      }
+      .tool-launcher {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        width: 60px;
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.5rem;
+        gap: 1rem;
+        z-index: 15;
+        pointer-events: auto;
+      }
+      .tool-button {
+        background: transparent;
+        border: none;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+      .tool-button:hover,
+      .tool-button.active {
+        background: #000000;
+      }
+      .tool-button svg {
+        width: 28px;
+        height: 28px;
+        stroke: #333;
+        transition: stroke 0.2s ease;
+      }
+      .tool-button:hover svg,
+      .tool-button.active svg {
+        stroke: #ffffff;
+      }
+      .widget-area {
+        flex-grow: 1;
+        position: relative;
+        padding: 2rem;
+        pointer-events: auto;
+        height: 100%;
+      }
+
+      /* Fullscreen & Lock Modes */
+      body.in-fullscreen-mode .widget-area {
+        pointer-events: none;
+      }
+      body.in-fullscreen-mode.video-locked #background-video-container {
+        pointer-events: none;
+      }
+      body.in-fullscreen-mode.video-locked .widget-area {
+        pointer-events: auto;
+      }
+      body.in-fullscreen-mode .widget,
+      body.in-fullscreen-mode .dock {
+        pointer-events: auto;
+      }
+      #exit-fullscreen-btn,
+      #lock-video-btn {
+        display: none;
+      }
+      body.in-fullscreen-mode #exit-fullscreen-btn,
+      body.in-fullscreen-mode #lock-video-btn {
+        display: block;
+      }
+
+      .widget {
+        position: absolute;
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        display: none;
+        flex-direction: column;
+        resize: both;
+        overflow: auto;
+        min-width: 300px;
+        min-height: 200px;
+        transition: opacity 0.3s ease, border-color 0.3s ease;
+      }
+      .widget.show {
+        display: flex;
+      }
+      .widget-header {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: grab;
+      }
+      .widget-header:active {
+        cursor: grabbing;
+      }
+      .widget-title {
+        font-weight: 500;
+        flex-grow: 1;
+      }
+      .widget-controls {
+        display: flex;
+        align-items: center;
+      }
+      .widget-fullscreen-btn,
+      .widget-minimize-btn,
+      .widget-close-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.5rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0 0.25rem;
+      }
+
+      /* Active Video Player Highlight */
+      .widget.video-player-widget.active-video {
+        border-color: var(--accent-color-2);
+        box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+      }
+
+      /* Specific Widget Styles */
+      #pomodoro-widget {
+        background-color: var(--widget-bg-1);
+      }
+      #tasks-widget {
+        background-color: var(--widget-bg-2);
+      }
+      #notes-widget {
+        background-color: var(--widget-bg-3);
+      }
+      #links-widget {
+        background-color: var(--widget-bg-4);
+      }
+      #settings-widget {
+        background-color: var(--widget-bg-5);
+      }
+      .video-player-widget {
+        background-color: var(--widget-bg-1);
+      }
+
+      #pomodoro-widget .widget-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+      }
+      .current-task-display {
+        color: var(--accent-color-2);
+        font-weight: 500;
+        text-align: center;
+        height: 2.5em;
+      }
+      .timer-display {
+        font-size: 4rem;
+        font-weight: 700;
+        color: #fff;
+      }
+      .timer-modes {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .mode-button {
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+      }
+      .mode-button.active {
+        background: var(--accent-color-2);
+        color: #000;
+        border-color: var(--accent-color-2);
+      }
+      .timer-controls {
+        display: flex;
+        gap: 1rem;
+      }
+      .control-button {
+        padding: 0.5rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid var(--border-color);
+      }
+      .start-pause-btn {
+        background: var(--accent-color-1);
+        color: #fff;
+        border-color: var(--accent-color-1);
+      }
+      .reset-btn {
+        background: transparent;
+        color: var(--text-secondary);
+      }
+
+      #tasks-widget .task-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      #tasks-widget .task-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      #tasks-widget .task-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+      }
+      #tasks-widget .task-item.completed label {
+        text-decoration: line-through;
+        color: var(--text-secondary);
+      }
+      .new-task-form {
+        display: flex;
+        margin-top: 1rem;
+      }
+      .new-task-input {
+        flex-grow: 1;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        padding: 0.25rem 0.5rem;
+      }
+
+      .setting-group {
+        margin-bottom: 1.5rem;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+      .input-field {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        padding: 0.5rem;
+        color: #fff;
+      }
+      .apply-btn {
+        width: 100%;
+        padding: 0.5rem;
+        background: var(--accent-color-2);
+        color: #000;
+        font-weight: 600;
+        border: none;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        margin-top: 0.5rem;
+      }
+
+      .video-player-widget .widget-content {
+        padding: 0;
+        overflow: hidden;
+        flex-grow: 1;
+        display: flex;
+      }
+      .video-player-widget .video-player-container {
+        width: 100%;
+        height: 100%;
+      }
+      .video-player-widget iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+
+      /* Notes Widget (CodeMirror) */
+      #notes-widget .widget-content {
+        padding: 0;
+        overflow: hidden;
+      }
+      .CodeMirror {
+        height: 100%;
+        font-size: 14px;
+      }
+
+      /* Work Area Styles */
+      .work-area-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        gap: 2rem;
+      }
+      .sound-controls {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .sound-btn {
+        padding: 1rem 2rem;
+        background: var(--widget-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .sound-btn.active {
+        background: var(--accent-color-1);
+        color: #fff;
+        border-color: var(--accent-color-1);
+        box-shadow: 0 0 15px var(--accent-color-1);
+      }
+
+      /* Dock Styles */
+      .dock {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(10, 10, 15, 0.9);
+        border: 1px solid var(--border-color);
+        border-bottom: none;
+        border-radius: 0.75rem 0.75rem 0 0;
+        padding: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 20;
+      }
+      .dock-item {
+        background: var(--hover-bg);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        color: var(--text-secondary);
+        font-weight: 500;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+      }
+      .dock-item:hover {
+        background: var(--accent-color-2);
+        color: #000;
+      }
+
+      /* Task Selection Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-content {
+        background: var(--widget-bg-1);
+        padding: 2rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+        width: 90%;
+        max-width: 400px;
+      }
+      .modal-task-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .modal-task-item {
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        margin-bottom: 0.5rem;
+      }
+      .modal-task-item:hover {
+        background: var(--hover-bg);
+      }
+
+      /* Links Widget Styles */
+      .links-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .link-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--hover-bg);
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+      }
+      .link-item a {
+        color: var(--accent-color-2);
+        text-decoration: none;
+      }
+      .remove-link-btn {
+        background: none;
+        border: none;
+        color: #ff5555;
+        cursor: pointer;
+        font-size: 1.2rem;
+      }
+    </style>
+  </head>
+  <body>
     <canvas id="portal-canvas"></canvas>
     <div class="main-layout" id="main-layout">
-        <!-- Main App Sidebar -->
-        <nav class="sidebar" id="sidebar">
-             <div class="sidebar-header">
-                <div class="logo-wrapper">
-                    <img src="https://placehold.co/40x40/0a0c1c/ffffff?text=S" alt="Logo" class="profile-pic">
-                </div>
-                <button class="sidebar-toggle" id="sidebar-toggle">
-                    <div class="hamburger-icon">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </button>
+      <!-- Main App Sidebar -->
+      <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="logo-wrapper">
+            <img
+              src="https://placehold.co/40x40/0a0c1c/ffffff?text=S"
+              alt="Logo"
+              class="profile-pic"
+            />
+          </div>
+          <button class="sidebar-toggle" id="sidebar-toggle">
+            <div class="hamburger-icon">
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
-            <div class="nav-links">
-                <ul>
-                    <li><a data-page="dashboard-page" class="active"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Dashboard</span></a></li>
-                    <li><a data-page="pomodoro-page"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Study Space</span></a></li>
-                    <li><a data-page="work-area-page"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path><path d="M12 22a8 8 0 0 0 8-8"></path></svg><span>Peace Environment</span></a></li>
-                </ul>
-            </div>
-            <div class="sidebar-footer">
-                 <a>
-                     <div class="logo-wrapper">
-                         <img src="https://placehold.co/40x40/0a0c1c/ffffff?text=P" alt="Profile Picture" class="profile-pic" onerror="this.onerror=null;this.src='https://placehold.co/40x40/0a0c1c/ffffff?text=P';">
-                         <span>Soumya</span>
-                     </div>
-                 </a>
-            </div>
-        </nav>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <!-- Dashboard Page -->
-            <div id="dashboard-page" class="page active">
-                <h1 class="text-3xl font-bold text-white p-8">Dashboard</h1>
-            </div>
-
-            <!-- Pomodoro Workspace Page -->
-            <div id="pomodoro-page" class="page">
-                <div class="workspace-container">
-                    <div id="background-video-container"></div>
-                    <div class="workspace-overlay">
-                        <div class="widget-area" id="widget-area">
-                            <!-- Widgets will be placed here by script -->
-                            <div class="dock" id="dock"></div>
-                        </div>
-                        <div class="tool-launcher">
-                            <button class="tool-button" data-widget="pomodoro-widget" title="Timer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
-                            <button class="tool-button" data-widget="tasks-widget" title="Tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button>
-                            <button class="tool-button" data-widget="notes-widget" title="Notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></button>
-                            <button class="tool-button" data-widget="links-widget" title="Links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg></button>
-                             <button class="tool-button" id="add-lecture-btn" title="Add Lecture Video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline><line x1="12" y1="15" x2="12" y2="15" /><line x1="12" y1="12" x2="12" y2="12" /><line x1="12" y1="9" x2="12" y2="9" /></svg></button>
-                            <button class="tool-button" data-widget="settings-widget" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82-.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
-                            <button class="tool-button" id="lock-video-btn" title="Lock Video Interaction">
-                                <svg class="unlock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
-                                <svg class="lock-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            </button>
-                            <button class="tool-button" id="exit-fullscreen-btn" title="Exit Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-             <!-- Work Area Page -->
-            <div id="work-area-page" class="page">
-                <div class="work-area-content">
-                    <h1 class="text-4xl font-bold">Peace Environment</h1>
-                    <p class="text-lg text-gray-400">Select a sound to begin your focus session.</p>
-                    <div class="sound-controls">
-                        <button class="sound-btn" data-sound="rain">Rain</button>
-                        <button class="sound-btn" data-sound="forest">Forest</button>
-                        <button class="sound-btn" data-sound="hum">Hum</button>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-    
-    <div class="modal-overlay" id="task-selection-modal">
-        <div class="modal-content">
-            <h2 class="text-xl font-bold mb-4">Select a task for this session</h2>
-            <ul class="modal-task-list" id="modal-task-list"></ul>
+          </button>
         </div>
+        <div class="nav-links">
+          <ul>
+            <li>
+              <a data-page="dashboard-page" class="active"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" /></svg
+                ><span>Dashboard</span></a
+              >
+            </li>
+            <li>
+              <a data-page="pomodoro-page"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" /></svg
+                ><span>Study Space</span></a
+              >
+            </li>
+            <li>
+              <a data-page="work-area-page"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                  <path d="M12 22a8 8 0 0 0 8-8"></path></svg
+                ><span>Peace Environment</span></a
+              >
+            </li>
+          </ul>
+        </div>
+        <div class="sidebar-footer">
+          <a>
+            <div class="logo-wrapper">
+              <img
+                src="https://placehold.co/40x40/0a0c1c/ffffff?text=P"
+                alt="Profile Picture"
+                class="profile-pic"
+                onerror="this.onerror=null;this.src='https://placehold.co/40x40/0a0c1c/ffffff?text=P';"
+              />
+              <span>Soumya</span>
+            </div>
+          </a>
+        </div>
+      </nav>
+
+      <!-- Main Content Area -->
+      <main class="main-content">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page active">
+          <h1 class="text-3xl font-bold text-white p-8">Dashboard</h1>
+        </div>
+
+        <!-- Pomodoro Workspace Page -->
+        <div id="pomodoro-page" class="page">
+          <div class="workspace-container">
+            <div id="background-video-container"></div>
+            <div class="workspace-overlay">
+              <div class="widget-area" id="widget-area">
+                <!-- Widgets will be placed here by script -->
+                <div class="dock" id="dock"></div>
+              </div>
+              <div class="tool-launcher">
+                <button
+                  class="tool-button"
+                  data-widget="pomodoro-widget"
+                  title="Timer"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </button>
+                <button
+                  class="tool-button"
+                  data-widget="tasks-widget"
+                  title="Tasks"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                </button>
+                <button
+                  class="tool-button"
+                  data-widget="notes-widget"
+                  title="Notes"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                  </svg>
+                </button>
+                <button
+                  class="tool-button"
+                  data-widget="links-widget"
+                  title="Links"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"
+                    ></path>
+                    <path
+                      d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  class="tool-button"
+                  id="add-lecture-btn"
+                  title="Add Lecture Video"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect
+                      x="2"
+                      y="7"
+                      width="20"
+                      height="15"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <polyline points="17 2 12 7 7 2"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="15" />
+                    <line x1="12" y1="12" x2="12" y2="12" />
+                    <line x1="12" y1="9" x2="12" y2="9" />
+                  </svg>
+                </button>
+                <button
+                  class="tool-button"
+                  data-widget="settings-widget"
+                  title="Settings"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                      d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82-.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                    />
+                  </svg>
+                </button>
+                <button
+                  class="tool-button"
+                  id="lock-video-btn"
+                  title="Lock Video Interaction"
+                >
+                  <svg
+                    class="unlock-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect
+                      x="3"
+                      y="11"
+                      width="18"
+                      height="11"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+                  </svg>
+                  <svg
+                    class="lock-icon"
+                    style="display: none"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect
+                      x="3"
+                      y="11"
+                      width="18"
+                      height="11"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </button>
+                <button
+                  class="tool-button"
+                  id="exit-fullscreen-btn"
+                  title="Exit Fullscreen"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Work Area Page -->
+        <div id="work-area-page" class="page">
+          <div class="work-area-content">
+            <h1 class="text-4xl font-bold">Peace Environment</h1>
+            <p class="text-lg text-gray-400">
+              Select a sound to begin your focus session.
+            </p>
+            <div class="sound-controls">
+              <button class="sound-btn" data-sound="rain">Rain</button>
+              <button class="sound-btn" data-sound="forest">Forest</button>
+              <button class="sound-btn" data-sound="hum">Hum</button>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
-    
-    
-</body>
+
+    <div class="modal-overlay" id="task-selection-modal">
+      <div class="modal-content">
+        <h2 class="text-xl font-bold mb-4">Select a task for this session</h2>
+        <ul class="modal-task-list" id="modal-task-list"></ul>
+      </div>
+    </div>
+  </body>
 </html>
