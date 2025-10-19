@@ -29,6 +29,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/closebrackets.min.js"></script>
     <!-- Three.js for the portal effect -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
 
     <style>
       /* Custom styles for the futuristic look */
@@ -678,6 +679,16 @@
         cursor: pointer;
         font-size: 1.2rem;
       }
+      #Rain-btn:hover{
+        background-color: rgb(27,47,58)
+      }
+      #forest-btn:hover{
+        background-color: green;
+      }
+      #hum-btn:hover{
+        background-color: rgb(227, 242, 251);
+        color: #ff5555;
+      }
     </style>
   </head>
   <body>
@@ -961,9 +972,9 @@
               Select a sound to begin your focus session.
             </p>
             <div class="sound-controls">
-              <button class="sound-btn" data-sound="rain">Rain</button>
-              <button class="sound-btn" data-sound="forest">Forest</button>
-              <button class="sound-btn" data-sound="hum">Hum</button>
+              <button class="sound-btn" data-sound="rain" id="Rain-btn">Rain</button>
+              <button class="sound-btn" data-sound="forest" id="forest-btn">Forest</button>
+              <button class="sound-btn" data-sound="hum" id="hum-btn">Hum</button>
             </div>
           </div>
         </div>
